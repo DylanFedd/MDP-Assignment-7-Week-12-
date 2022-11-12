@@ -9,7 +9,7 @@ const mongoose = require('mongoose');
 const PORT = 1200;
 let today = new Date().toLocaleDateString()
 
-const dbUrl = "mongodb+srv://dbadmin:admin@mongo.zjgsurz.mongodb.net/test";
+const dbUrl = "mongodb+srv://Admin:Password1@cluster0.zgxoeih.mongodb.net/test";
 
 //Connect to MongoDB
 mongoose.connect(dbUrl, {
@@ -113,6 +113,98 @@ app.post('/addStudent', async (req,res) => {
     }
     catch {
         return res.status(500).json("{message: Failed to add student - bad data}");
+    }
+});
+
+// edit a student fname by looking up _id
+app.post("/editStudentById", async (req, res) => {
+    try {
+        let learner = await Student.updateOne({_id: req.body.id}, {
+            fname: req.body.fname
+        });
+
+        if (learner) {
+            return res.status(200).json("message: student first name updated");
+        }
+        else {
+            return res.status(200).json("message: no student found");
+        }
+    }
+    catch {
+        return res.status(500).json("message: Failed to edit student by ID - bad data");
+    }
+});
+
+// edit a student fname and lname by looking the students fname
+app.post("/editStudentByFname", async (req, res) => {
+    try {
+        let learner = await Student.updateOne({fname: req.body.queryFname}, {
+            fname: req.body.fname,
+            lname: req.body.lname
+        });
+
+        if (learner) {
+            return res.status(200).json("{message: student first and last name updated}");
+        }
+        else {
+            return res.status(200).json("{message: no student found}");
+        }
+    }
+    catch {
+        return res.status(500).json("{message: Failed to edit student by queryfname - bad data}");
+    }
+});
+
+//edit the instructor by looking up the course name
+app.post("/editCourseByCourseName", async (req, res) => {
+    try {
+        let program = await Course.updateOne({courseName: req.body.courseName}, {
+            courseInstructor: req.body.instructorName
+        });
+
+        if (program) {
+            return res.status(200).json("{message: course instructor updated}");
+        }
+        else {
+            return res.status(200).json("{message: no course found}");
+        }
+    }
+    catch {
+        return res.status(500).json("{message: Failed to edit course by courseName - bad data}");
+    }
+});
+
+//delete course by ID
+app.post('/deleteCourseById', async (req,res) =>{
+    try{
+        let program = await Course.findOne({_id: req.body.id});
+        if(program){
+            await Course.deleteOne({_id: req.body.id})
+            return res.status(200).json("{message: course deleted}");
+        }
+        else{
+            return res.status(200).json("{message: no course found}");
+        }
+    }
+    catch{
+        return res.status(500).json("{message: Failed to delete course by ID - bad data}");
+    }
+});
+
+// removes the student by the StudentID
+app.post('/removeStudentFromClasses', async (req,res) =>{
+    try{
+        let learner = await Student.findOne({studentID: req.body.studentid});
+        if(learner){
+            await Student.deleteOne({studentID: req.body.studentid})
+            return res.status(200).json("{message: student deleted}");
+        }
+        else{
+            return res.status(200).json("{message: no student found}");
+        }
+    }
+    catch{
+        return res.status(500).json("{message: Failed to delete student by studentID - bad data}");
     }
 });
 
